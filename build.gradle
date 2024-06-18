@@ -1,19 +1,37 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version '2.11.2'
 }
 
-group = 'ru.netology'
+group = 'org.example'
 version = '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.codeborne:selenide:6.17.2'
+    testImplementation 'com.github.javafaker:javafaker:1.0.2'
+    testImplementation 'io.qameta.allure:allure-junit5'
+    testImplementation 'io.qameta.allure:allure-selenide:2.22.0'
+    testImplementation 'io.rest-assured:rest-assured:5.3.1'
+    testImplementation 'io.rest-assured:json-schema-validator:4.3.1'
+    testImplementation 'mysql:mysql-connector-java:8.0.32'
+    testImplementation 'org.postgresql:postgresql:42.6.0'
+    testImplementation 'commons-dbutils:commons-dbutils:1.7'
 }
 
 test {
     useJUnitPlatform()
+    systemProperty 'selenide.headless', System.getProperty('selenide.headless')
+    systemProperty 'chromeoptions.prefs', System.getProperty('chromeoptions.prefs', "profile.password_manager_leak_detection=false")
+    systemProperty 'db.url', System.getProperty('db.url', 'jdbc:mysql://localhost:3306/app')
+    systemProperty 'sut.url', System.getProperty('sut.url', 'http://localhost:8080')
 }
