@@ -1,4 +1,4 @@
-package DataHelper;
+package dataHelper;
 
 import com.github.javafaker.Faker;
 

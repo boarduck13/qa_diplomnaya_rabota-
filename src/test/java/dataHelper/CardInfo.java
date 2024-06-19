@@ -1,4 +1,4 @@
-package DataHelper;
+package dataHelper;
 
 public class CardInfo {
 
