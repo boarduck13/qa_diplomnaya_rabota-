@@ -16,7 +16,7 @@
 # Отчет Allure
 
 
-![merge_from_ofoct.jpg](..%2F..%2Fmerge_from_ofoct.jpg)
+<a href="https://ibb.co/1zycrjR"><img src="https://i.ibb.co/NTDR9bW/merge-from-ofoct.jpg" alt="merge-from-ofoct" border="0"></a>
 
 ## Общие рекомендации
 
