@@ -1,13 +1,13 @@
 package test;
 
 import com.codeborne.selenide.logevents.SelenideLogger;
-import dataHelper.CardInfo;
+import data.CardInfo;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
 
-import static dataHelper.ApiHelper.*;
-import static dataHelper.DataHelper.*;
-import static dataHelper.SqlHelper.*;
+import static data.ApiHelper.*;
+import static data.DataHelper.*;
+import static data.SqlHelper.*;
 
 public class ApiPaymentTourTests {
     private final String approved = "APPROVED";

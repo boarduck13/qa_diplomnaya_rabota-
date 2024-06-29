@@ -1,8 +1,8 @@
 package test;
 
 import com.codeborne.selenide.logevents.SelenideLogger;
-import dataHelper.CardInfo;
-import dataHelper.DataHelper;
+import data.CardInfo;
+import data.DataHelper;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
 import pages.MainPage;
@@ -10,7 +10,7 @@ import pages.PayPage;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Selenide.open;
-import static dataHelper.DataHelper.*;
+import static data.DataHelper.*;
 
 public class DebitPaymentTourTests {
 
