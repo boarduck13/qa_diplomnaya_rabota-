@@ -46,8 +46,8 @@ public class PayPage {
         submit.click();
     }
 
-    public String getNoticeText() {
-        return $(".notification__title").shouldBe(visible, Duration.ofSeconds(20)).getText();
+    public void getNoticeText(String msg) {
+        $(".notification__title").shouldBe(visible, Duration.ofSeconds(20)).shouldHave(text(msg));
     }
 
     public ElementsCollection getInputsSub() {
@@ -58,23 +58,23 @@ public class PayPage {
         return inputs.get(index).$(".input__control").getValue();
     }
 
-    public String getNoticeInputNumber() {
-        return inputNumber.$(".input__sub").shouldBe(visible).getText();
+    public void getNoticeInputNumber(String msg) {
+        inputNumber.$(".input__sub").shouldBe(visible).shouldHave(text(msg));
     }
 
-    public String getNoticeInputMouth() {
-        return inputMouth.$(".input__sub").shouldBe(visible).getText();
+    public void getNoticeInputMouth(String msg) {
+        inputMouth.$(".input__sub").shouldBe(visible).shouldHave(text(msg));
     }
 
-    public String getNoticeInputYear() {
-        return inputYear.$(".input__sub").shouldBe(visible).getText();
+    public void getNoticeInputYear(String msg) {
+        inputYear.$(".input__sub").shouldBe(visible).shouldHave(text(msg));
     }
 
-    public String getNoticeInputOwner() {
-        return inputOwner.$(".input__sub").shouldBe(visible).getText();
+    public void getNoticeInputOwner(String msg) {
+        inputOwner.$(".input__sub").shouldBe(visible).shouldHave(text(msg));
     }
 
-    public String getNoticeInputCvc() {
-        return inputCvc.$(".input__sub").shouldBe(visible).getText();
+    public void getNoticeInputCvc(String msg) {
+        inputCvc.$(".input__sub").shouldBe(visible).shouldHave(text(msg));
     }
 }

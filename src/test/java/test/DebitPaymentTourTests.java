@@ -11,8 +11,7 @@ import pages.PayPage;
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Selenide.open;
 import static data.DataHelper.*;
-import static data.SqlHelper.cleanDB;
-import static data.SqlHelper.getStatusFromPaymentEntity;
+import static data.SqlHelper.*;
 
 public class DebitPaymentTourTests {
 
@@ -32,7 +31,6 @@ public class DebitPaymentTourTests {
     private final int inputCvc = 4;
 
     private final String approved = "APPROVED";
-
 
     @BeforeAll
     static void setupAllureReports() {
@@ -65,9 +63,37 @@ public class DebitPaymentTourTests {
         PayPage payPage = mainPage.clickToPay();
         payPage.enterCardData(cardInfo);
         payPage.clickSubmit();
-        String notice = payPage.getNoticeText();
+        payPage.getNoticeText(success);
+        }
 
-        Assertions.assertTrue(notice.contains(success));
+    @Test
+    @DisplayName("Дебетовая карта. Успешная оплата с подтвержденной карты (со значением “APPROVED”)")
+    void qsuccessfulPayFromApprovedDebitCard() throws InterruptedException {
+        CardInfo cardInfo = DataHelper.getCardInfo(true);
+
+        MainPage mainPage = new MainPage();
+        PayPage payPage = mainPage.clickToPay();
+        payPage.enterCardData(cardInfo);
+        payPage.clickSubmit();
+        Thread.sleep(7000);
+        String paymentStatusDB = getStatusFromPaymentEntity();
+
+        Assertions.assertEquals(approved, paymentStatusDB);
+    }
+
+    @Test
+    @DisplayName("Дебетовая карта. Неудачная оплата с отклоненной карты (со значением “DECLINED”)")
+    void qfailedPayFromApprovedDebitCard() throws InterruptedException {
+        CardInfo cardInfo = DataHelper.getCardInfo(false);
+
+        MainPage mainPage = new MainPage();
+        PayPage payPage = mainPage.clickToPay();
+        payPage.enterCardData(cardInfo);
+        payPage.clickSubmit();
+        Thread.sleep(7000);
+        String paymentStatusDB = getStatusFromPaymentEntity();
+
+        Assertions.assertEquals(null, paymentStatusDB);
     }
 
     @Test
@@ -79,42 +105,10 @@ public class DebitPaymentTourTests {
         PayPage payPage = mainPage.clickToPay();
         payPage.enterCardData(cardInfo);
         payPage.clickSubmit();
-        String notice = payPage.getNoticeText();
+        payPage.getNoticeText(error);
 
-        Assertions.assertTrue(notice.contains(error));
         //Баг - отображается уведомление об успехе операции
     }
-
-    @Test
-    @DisplayName("Дебетовая карта. результат операции приобретения тура в базе данных (со значением “APPROVED”)")
-    void qsuccessfulPayFromApprovedDebitCard() throws InterruptedException {
-        CardInfo cardInfo = DataHelper.getCardInfo(true);
-
-        MainPage mainPage = new MainPage();
-        PayPage payPage = mainPage.clickToPay();
-        payPage.enterCardData(cardInfo);
-        payPage.clickSubmit();
-        Thread.sleep(10000);
-        String paymentStatusDB = getStatusFromPaymentEntity();
-
-        Assertions.assertEquals(approved, paymentStatusDB);
-    }
-
-    @Test
-    @DisplayName("Дебетовая карта. результат операции приобретения тура в базе данных (со значением “DECLINED”)")
-    void qfailedPayFromApprovedDebitCard() throws InterruptedException {
-        CardInfo cardInfo = DataHelper.getCardInfo(false);
-
-        MainPage mainPage = new MainPage();
-        PayPage payPage = mainPage.clickToPay();
-        payPage.enterCardData(cardInfo);
-        payPage.clickSubmit();
-        Thread.sleep(10000);
-        String paymentStatusDB = getStatusFromPaymentEntity();
-
-        Assertions.assertEquals(null, paymentStatusDB);
-    }
-    // Баг - в базу записывается значение об успехе операции
 
     @Test
     @DisplayName("Дебетовая карта. Неудачная оплата картой, которой нет в базе")
@@ -125,9 +119,8 @@ public class DebitPaymentTourTests {
         PayPage payPage = mainPage.clickToPay();
         payPage.enterCardData(cardInfo);
         payPage.clickSubmit();
-        String notice = payPage.getNoticeText();
+        payPage.getNoticeText(error);
 
-        Assertions.assertTrue(notice.contains(error));
         //Баг - отображается оба уведомления об успехе и неудаче операции
     }
 
@@ -155,10 +148,9 @@ public class DebitPaymentTourTests {
 
         payPage.enterCardData(cardInfo);
         payPage.clickSubmit();
-        String notice = payPage.getNoticeText();
-
+        payPage.getNoticeText(success);
         payPage.getInputsSub().shouldHave(size(0));
-        Assertions.assertTrue(notice.contains(success));
+
         // Баг - подсказки валидации не скрываются после ввода валидных данных
     }
 
@@ -176,7 +168,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputNumber());
+        payPage.getNoticeInputNumber(wrongFormat);
     }
 
     @Test
@@ -205,7 +197,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputNumber));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputNumber());
+        payPage.getNoticeInputNumber(wrongFormat);
     }
 
     @Test
@@ -220,7 +212,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputNumber));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputNumber());
+        payPage.getNoticeInputNumber(wrongFormat);
     }
 
     @Test
@@ -235,7 +227,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputNumber));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputNumber());
+        payPage.getNoticeInputNumber(requiredField);
         // Баг - отображается подсказка неверного формата
     }
 
@@ -252,7 +244,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(invalidExpirationDate, payPage.getNoticeInputMouth());
+        payPage.getNoticeInputMouth(invalidExpirationDate);
         // Баг - нет валидации поля на ввод 00
     }
 
@@ -267,7 +259,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(invalidExpirationDate, payPage.getNoticeInputMouth());
+        payPage.getNoticeInputMouth(invalidExpirationDate);
     }
 
     @Test
@@ -281,7 +273,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputMouth());
+        payPage.getNoticeInputMouth(wrongFormat);
     }
 
     @Test
@@ -296,7 +288,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputMouth));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputMouth());
+        payPage.getNoticeInputMouth(wrongFormat);
     }
 
     @Test
@@ -311,7 +303,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputMouth));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputMouth());
+        payPage.getNoticeInputMouth(wrongFormat);
     }
 
     @Test
@@ -326,7 +318,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputMouth));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputMouth());
+        payPage.getNoticeInputMouth(requiredField);
         // Баг - отображается подсказка неверного формата
     }
 
@@ -343,7 +335,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(cardExpired, payPage.getNoticeInputYear());
+        payPage.getNoticeInputYear(cardExpired);
     }
 
     @Test
@@ -356,10 +348,9 @@ public class DebitPaymentTourTests {
         payPage.enterCardData(cardInfo);
         payPage.clickSubmit();
 
-        String notice = payPage.getNoticeText();
+        payPage.getNoticeText(success);
 
         payPage.getInputsSub().shouldHave(size(0));
-        Assertions.assertTrue(notice.contains(success));
     }
 
     @Test
@@ -373,7 +364,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(invalidExpirationDate, payPage.getNoticeInputYear());
+        payPage.getNoticeInputYear(invalidExpirationDate);
     }
 
     @Test
@@ -387,7 +378,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(cardExpired, payPage.getNoticeInputYear());
+        payPage.getNoticeInputYear(cardExpired);
         Assertions.assertEquals("20", payPage.getInputValue(inputYear));
     }
 
@@ -403,7 +394,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputYear));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputYear());
+        payPage.getNoticeInputYear(wrongFormat);
     }
 
     @Test
@@ -418,7 +409,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputYear));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputYear());
+        payPage.getNoticeInputYear(wrongFormat);
     }
 
     @Test
@@ -433,7 +424,7 @@ public class DebitPaymentTourTests {
 
         payPage.getInputsSub().shouldHave(size(1));
         Assertions.assertEquals("", payPage.getInputValue(inputYear));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputYear());
+        payPage.getNoticeInputYear(requiredField);
         // Баг - отображается подсказка неверного формата
     }
 
@@ -450,7 +441,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(wrongFormat);
         // Баг - нет валидации поля на ввод цифр
     }
 
@@ -465,41 +456,41 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(wrongFormat);
         // Баг - нет валидации поля на ввод кириллицы
     }
 
     @Test
     @DisplayName("Дебетовая карта. Валидация поля Владелец. Пробел в начале")
     void validationOwnerCardFieldSpaceInAtFirst() {
-        CardInfo cardInfo = new CardInfo(getApprovedCardNumber(), generateMouth(), generateYear(), " " + generateOwner(), getCvc());
+        CardInfo cardInfo = new CardInfo(getApprovedCardNumber(), generateMouth(), generateYear(), " " + removeSpace(generateOwner()), getCvc());
 
         MainPage mainPage = new MainPage();
         PayPage payPage = mainPage.clickToPay();
         payPage.enterCardData(cardInfo);
         String ownerValue = removeSpace(payPage.getInputValue(inputOwner));
         payPage.clickSubmit();
-        payPage.getNoticeText();
+        payPage.getNoticeText(success);
 
         Assertions.assertEquals(ownerValue, payPage.getInputValue(inputOwner));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(wrongFormat);
         // Баг - нет валидации поля на ввод пробела в начале
     }
 
     @Test
     @DisplayName("Дебетовая карта. Валидация поля Владелец. Пробел в конце")
     void validationOwnerCardFieldSpaceInAtTheEnd() {
-        CardInfo cardInfo = new CardInfo(getApprovedCardNumber(), generateMouth(), generateYear(), generateOwner() + " ", getCvc());
+        CardInfo cardInfo = new CardInfo(getApprovedCardNumber(), generateMouth(), generateYear(), removeSpace(generateOwner()) + " ", getCvc());
 
         MainPage mainPage = new MainPage();
         PayPage payPage = mainPage.clickToPay();
         payPage.enterCardData(cardInfo);
         String ownerValue = removeSpace(payPage.getInputValue(inputOwner));
         payPage.clickSubmit();
-        payPage.getNoticeText();
+        payPage.getNoticeText(success);
 
         Assertions.assertEquals(ownerValue, payPage.getInputValue(inputOwner));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(wrongFormat);
         // Баг - нет валидации поля на ввод пробела в конце
     }
 
@@ -512,9 +503,10 @@ public class DebitPaymentTourTests {
         PayPage payPage = mainPage.clickToPay();
         payPage.enterCardData(cardInfo);
         payPage.clickSubmit();
+        payPage.getNoticeText(success);
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(wrongFormat);
         // Баг - нет валидации поля на ввод без пробела
     }
 
@@ -529,7 +521,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(wrongFormat);
         // Баг - нет валидации поля на ввод спец. символов
     }
 
@@ -544,7 +536,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputOwner());
+        payPage.getNoticeInputOwner(requiredField);
     }
 
     // [Валидация поля "CVC/CVV"] --------------------------------------------------------------------------------------
@@ -560,7 +552,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(wrongFormat, payPage.getNoticeInputCvc());
+        payPage.getNoticeInputCvc(wrongFormat);
     }
 
     @Test
@@ -588,7 +580,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputCvc());
+        payPage.getNoticeInputCvc(requiredField);
         Assertions.assertEquals("", payPage.getInputValue(inputCvc));
         // Баг - отображается две подсказки валидации поля, должна быть одна
     }
@@ -604,7 +596,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputCvc());
+        payPage.getNoticeInputCvc(requiredField);
         Assertions.assertEquals("", payPage.getInputValue(inputCvc));
         // Баг - отображается две подсказки валидации поля, должна быть одна
     }
@@ -620,7 +612,7 @@ public class DebitPaymentTourTests {
         payPage.clickSubmit();
 
         payPage.getInputsSub().shouldHave(size(1));
-        Assertions.assertEquals(requiredField, payPage.getNoticeInputCvc());
+        payPage.getNoticeInputCvc(requiredField);
         // Баг - отображается две подсказки валидации поля, должна быть одна
     }
 }
