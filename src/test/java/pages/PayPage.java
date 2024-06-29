@@ -9,8 +9,7 @@ import org.openqa.selenium.By;
 import java.time.Duration;
 
 import static com.codeborne.selenide.CollectionCondition.size;
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
@@ -50,8 +49,8 @@ public class PayPage {
         $(".notification__title").shouldBe(visible, Duration.ofSeconds(20)).shouldHave(text(msg));
     }
 
-    public ElementsCollection getInputsSub() {
-        return inputsSub;
+    public void getInputsSub(int size) {
+        inputsSub.shouldHave(size(size));
     }
 
     public String getInputValue(int index) {
