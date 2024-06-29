@@ -11,6 +11,7 @@ import pages.PayPage;
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Selenide.open;
 import static data.DataHelper.*;
+import static data.SqlHelper.*;
 
 public class CreditPaymentTourTests {
 
@@ -29,6 +30,8 @@ public class CreditPaymentTourTests {
     private final int inputOwner = 3;
     private final int inputCvc = 4;
 
+    private final String approved = "APPROVED";
+
     @BeforeAll
     static void setupAllureReports() {
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide());
@@ -37,6 +40,11 @@ public class CreditPaymentTourTests {
     @BeforeEach
     void setup() {
         open(System.getProperty("sut.url"));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        cleanDB();
     }
 
     @AfterAll
@@ -74,6 +82,39 @@ public class CreditPaymentTourTests {
         Assertions.assertTrue(notice.contains(error));
         //Баг - отображается уведомление об успехе операции
     }
+
+    @Test
+    @DisplayName("Кредитная карта. результат операции приобретения тура в базе данных (со значением “APPROVED”)")
+    void qsuccessfulPayFromApprovedDebitCard() throws InterruptedException {
+        CardInfo cardInfo = DataHelper.getCardInfo(true);
+
+        MainPage mainPage = new MainPage();
+        PayPage payPage = mainPage.clickToPayInCredit();
+        payPage.enterCardData(cardInfo);
+        payPage.clickSubmit();
+        Thread.sleep(10000);
+        String paymentStatusDB = getStatusFromCreditEntity();
+
+        Assertions.assertEquals(approved, paymentStatusDB);
+    }
+
+    @Test
+    @DisplayName("Кредитная карта. результат операции приобретения тура в базе данных (со значением “DECLINED”)")
+    void qfailedPayFromApprovedDebitCard() throws InterruptedException {
+        CardInfo cardInfo = DataHelper.getCardInfo(false);
+
+        MainPage mainPage = new MainPage();
+        PayPage payPage = mainPage.clickToPayInCredit();
+        payPage.enterCardData(cardInfo);
+        payPage.clickSubmit();
+        Thread.sleep(10000);
+        String paymentStatusDB = getStatusFromCreditEntity();
+
+        Assertions.assertEquals(null, paymentStatusDB);
+    }
+    // Баг - в базу записывается значение об успехе операции
+
+
 
     @Test
     @DisplayName("Кредитная карта. Неудачная оплата картой, которой нет в базе")
@@ -288,6 +329,8 @@ public class CreditPaymentTourTests {
         Assertions.assertEquals(requiredField, payPage.getNoticeInputMouth());
         // Баг - отображается подсказка неверного формата
     }
+
+
 
     // [Валидация поля "Год"] ------------------------------------------------------------------------------------------
 

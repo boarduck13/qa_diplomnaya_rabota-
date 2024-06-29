@@ -11,6 +11,8 @@ import pages.PayPage;
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Selenide.open;
 import static data.DataHelper.*;
+import static data.SqlHelper.cleanDB;
+import static data.SqlHelper.getStatusFromPaymentEntity;
 
 public class DebitPaymentTourTests {
 
@@ -29,6 +31,9 @@ public class DebitPaymentTourTests {
     private final int inputOwner = 3;
     private final int inputCvc = 4;
 
+    private final String approved = "APPROVED";
+
+
     @BeforeAll
     static void setupAllureReports() {
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide());
@@ -37,6 +42,11 @@ public class DebitPaymentTourTests {
     @BeforeEach
     void setup() {
         open(System.getProperty("sut.url"));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        cleanDB();
     }
 
     @AfterAll
@@ -74,6 +84,37 @@ public class DebitPaymentTourTests {
         Assertions.assertTrue(notice.contains(error));
         //Баг - отображается уведомление об успехе операции
     }
+
+    @Test
+    @DisplayName("Дебетовая карта. результат операции приобретения тура в базе данных (со значением “APPROVED”)")
+    void qsuccessfulPayFromApprovedDebitCard() throws InterruptedException {
+        CardInfo cardInfo = DataHelper.getCardInfo(true);
+
+        MainPage mainPage = new MainPage();
+        PayPage payPage = mainPage.clickToPay();
+        payPage.enterCardData(cardInfo);
+        payPage.clickSubmit();
+        Thread.sleep(10000);
+        String paymentStatusDB = getStatusFromPaymentEntity();
+
+        Assertions.assertEquals(approved, paymentStatusDB);
+    }
+
+    @Test
+    @DisplayName("Дебетовая карта. результат операции приобретения тура в базе данных (со значением “DECLINED”)")
+    void qfailedPayFromApprovedDebitCard() throws InterruptedException {
+        CardInfo cardInfo = DataHelper.getCardInfo(false);
+
+        MainPage mainPage = new MainPage();
+        PayPage payPage = mainPage.clickToPay();
+        payPage.enterCardData(cardInfo);
+        payPage.clickSubmit();
+        Thread.sleep(10000);
+        String paymentStatusDB = getStatusFromPaymentEntity();
+
+        Assertions.assertEquals(null, paymentStatusDB);
+    }
+    // Баг - в базу записывается значение об успехе операции
 
     @Test
     @DisplayName("Дебетовая карта. Неудачная оплата картой, которой нет в базе")
