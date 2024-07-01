@@ -6,17 +6,19 @@
 
 [Заведены и обнаруженны дефекты](https://github.com/boarduck13/qa_diplomnaya_rabota-/issues) с описанием и скриншотами
 
-### ***Общее количество тестов: 74***
+### ***Общее количество тестов: 78***
 
 ## Итоги тестирования 
 
-- Успешных: ```56.75 %```
-- Неуспешных: ```43.24 %```
+- Успешных: ```43.58 %```
+- Неуспешных: ```56.41 %```
 
 # Отчет Allure
 
+<a href="https://ibb.co/0Dn67Xc"><img src="https://i.ibb.co/tmHvGh4/2024-07-01-21-45-43.png" alt="2024-07-01-21-45-43" border="0"></a>
 
-<a href="https://ibb.co/1zycrjR"><img src="https://i.ibb.co/NTDR9bW/merge-from-ofoct.jpg" alt="merge-from-ofoct" border="0"></a>
+<a href="https://ibb.co/5Krs9w6"><img src="https://i.ibb.co/SftVxGP/merge-from-ofoct.jpg" alt="merge-from-ofoct" border="0"></a>
+
 
 ## Общие рекомендации
 
